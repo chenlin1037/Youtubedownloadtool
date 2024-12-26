@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube 视频下载器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo svg {
+            width: 60px;
+            height: 60px;
+            fill: #8b5cf6;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #1f2937;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 15px;
+            color: #4b5563;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #1f2937;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        }
+
+        .progress-container {
+            margin: 24px 0;
+            display: none;
+        }
+
+        .progress-bar {
+            background: #e5e7eb;
+            border-radius: 12px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar span {
+            display: block;
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #6d28d9);
+            width: 0;
+            transition: width 0.5s ease;
+            border-radius: 12px;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px 28px;
+            background: linear-gradient(90deg, #8b5cf6, #6d28d9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .format-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .format-option {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .format-option.active {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .format-option svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 8px;
+            fill: #6b7280;
+        }
+
+        .format-option.active svg {
+            fill: #8b5cf6;
+        }
+
+        .format-option span {
+            display: block;
+            font-size: 14px;
+            color: #4b5563;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 24px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 15px;
+            }
+
+            .video-info {
+                margin-top: 20px;
+                margin-bottom: 20px;
+                /* Add more styling as needed */
+            }
+
+            .thumbnail {
+                width: 200px;
+                /* Adjusted for consistency */
+                height: 120px;
+                /* Adjusted for consistency */
+                border-radius: 10px;
+                /* This creates the rounded corners */
+                /* Add more styling as needed */
+            }
+
+            .title {
+                /* Style for the title */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+            </svg>
+        </div>
+        <h1>YouTube 下载助手</h1>
+        <div class="input-group">
+            <label for="videoUrl">视频链接</label>
+            <input type="text" id="videoUrl" placeholder="粘贴YouTube视频链接">
+        </div>
+
+        <!-- 视频封面和标题 -->
+        <div class="video-info" id="videoInfo">
+            <img class="thumbnail" src="./01.png" width="200" height="120" alt="视频缩略图">
+            <div class="title">Video Title Here</div>
+            
+        </div>
+
+        <hr style="margin: 20px 0;">
+
+        <div class="format-group" id="formatGroup">
+            <div class="format-option active" data-type="audio">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z" />
+                </svg>
+                <span>音频格式</span>
+            </div>
+            <div class="format-option" data-type="video">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
+                </svg>
+                <span>视频格式</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="format">下载格式</label>
+            <select id="format">
+                <optgroup label="音频格式">
+                    <option value="mp3">MP3 音频</option>
+                    <option value="wav">WAV 音频</option>
+                    <option value="aac">AAC 音频</option>
+                    <option value="webm">WEBM 音频</option>
+                </optgroup>
+                <optgroup label="视频格式">
+                    <option value="360">MP4 360P</option>
+                    <option value="480">MP4 480P</option>
+                    <option value="720">MP4 720P</option>
+                    <option value="1080">MP4 1080P</option>
+                    <option value="1440">MP4 1440P</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <button class="btn" id="downloadBtn">
+            开始下载
+        </button>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <span></span>
+            </div>
+            <div class="progress-text">准备下载中...</div>
+        </div>
+    </div>
+
+    <script>
+        // 格式选择切换
+        const formatGroup = document.getElementById('formatGroup');
+        const formatSelect = document.getElementById('format');
+
+        formatGroup.addEventListener('click', (e) => {
+            const option = e.target.closest('.format-option');
+            if (!option) return;
+
+            document.querySelectorAll('.format-option').forEach(opt =>
+                opt.classList.remove('active')
+            );
+            option.classList.add('active');
+
+            // 更新选择框选项
+            const type = option.dataset.type;
+            const audioFormats = formatSelect.querySelector('optgroup[label="音频格式"]');
+            const videoFormats = formatSelect.querySelector('optgroup[label="视频格式"]');
+
+            if (type === 'audio') {
+                audioFormats.style.display = '';
+                videoFormats.style.display = 'none';
+                formatSelect.value = 'mp3';
+            } else {
+                audioFormats.style.display = 'none';
+                videoFormats.style.display = '';
+                formatSelect.value = '720';
+            }
+        });
+
+        async function makeYouTubeDownloadRequest(videoUrl, format = '') {
+            const baseUrl = 'https://p.oceansaver.in/ajax/download.php';
+            const apiKey = 'dfcb6d76f2f6a9894gjkege8a4ab232222';
+            const params = new URLSearchParams({
+                url: videoUrl,
+                format: format,
+                api: apiKey,
+                copyright: 0,
+            });
+            try {
+                const response = await fetch(`${baseUrl}?${params.toString()}`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error:', error);
+                return null;
+            }
+        }
+
+        //显示缩略图和标题
+        const videoInfo = document.querySelector('.video-info');
+        const thumbnail = document.querySelector('.thumbnail');
+        const title = document.querySelector('.title');
+
+
+
+        async function checkDownloadProgress(id) {
+            const baseUrl = 'https://p.oceansaver.in/ajax/progress.php';
+            let progress = 0;
+            const progressBar = document.querySelector('.progress-bar span');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressText = document.querySelector('.progress-text');
+
+            progressContainer.style.display = 'block';
+
+            while (progress < 1000) {
+                try {
+                    const response = await fetch(`${baseUrl}?id=${id}`);
+                    const data = await response.json();
+
+                    if (data.success === 1 && data.text === "Finished") {
+                        progressBar.style.width = '100%';
+                        progressText.textContent = '下载准备完成';
+                        return data.download_url;
+                    } else if (data.progress) {
+                        progress = parseInt(data.progress, 10);
+                        progressBar.style.width = `${progress}%`;
+                        progressText.textContent = `正在处理中 ${progress}%`;
+                    }
+                } catch (error) {
+                    console.error('Error checking progress:', error);
+                    break;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+            throw new Error('Download timeout or failed.');
+        }
+
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            const videoUrl = document.getElementById('videoUrl').value.trim();
+            const format = document.getElementById('format').value;
+
+            if (!videoUrl) {
+                alert('请输入视频链接！');
+                return;
+            }
+
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = '处理中...';
+
+            try {
+                const response = await makeYouTubeDownloadRequest(videoUrl, format);
+
+                if (response && response.id) {
+                    const downloadUrl = await checkDownloadProgress(response.id);
+
+                    image = response.info.image;
+                    title.textContent = response.info.title;
+                    thumbnail.src = image;
+                    if (downloadUrl) {
+                        window.location.href = downloadUrl;
+                    } else {
+                        alert('获取下载链接失败！');
+                    }
+                } else {
+                    alert('请求失败，请检查链接或稍后再试！');
+                }
+            } catch (error) {
+                alert('下载过程中发生错误！');
+                console.error(error);
+            } finally {
+                downloadBtn.disabled = false;
+                downloadBtn.textContent = '开始下载';
+                document.getElementById('progressContainer').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
