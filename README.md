@@ -58,6 +58,9 @@
 - 对于受版权保护的视频，请确保您有权下载。
 
 ## 贡献
+## 效果预览
+![image](https://github.com/user-attachments/assets/6ff7f221-00ae-47f6-86be-e0249be2aae5)
+
 
 欢迎各种形式的贡献，包括功能建议、代码优化、文档改善等。
 
